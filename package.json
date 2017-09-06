@@ -1,0 +1,22 @@
+{
+  "name": "gauge-meter",
+  "version": "1.0.0",
+  "description": "Canvas based Gauge meter",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaveenKY/gauge-meter.git"
+  },
+  "keywords": [
+    "gauge"
+  ],
+  "author": "Naveen Kumar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NaveenKY/gauge-meter/issues"
+  },
+  "homepage": "https://github.com/NaveenKY/gauge-meter#readme"
+}
