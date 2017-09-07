@@ -23,12 +23,9 @@
 } (this, function () {
 	var GaugeMeter = function GaugeMeter(element, opts) {
 		if (!element) {
-			throw new Error("No element id provided!");
+			throw new Error("No element provided!");
 		}
-		this.canvas = document.getElementById(element);
-		if (!this.canvas) {
-			throw new Error("HTML Element not Found!");
-		}
+		this.canvas = element;
 		if (this.canvas.tagName !== 'CANVAS') {
 			throw new Error("HTML Element must of type CANVAS!");
 		}
@@ -82,10 +79,14 @@
 		/*=====================================================
 		 *	Set Value : Set the Value for the Guage Meter
 		=============================*/
-		setValue: function (value) {
+		setValue: function (value, innerValue) {
 			if (!value) {
 				throw new Error("Provide a value to be set for Gauge meter!");
 			}
+			if (this.options.innerRing && !innerValue) {
+				throw new Error("Please provide value for inner ring!");
+			}
+			this.innerValue = innerValue;
 			var ctx = this.canvas.getContext("2d");
 			ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 			this.prepareElement();
@@ -94,6 +95,19 @@
 			var radius = (this.canvas.width - (this.options.lineWidth * 2)) / 2;
 			this.value = value;
 			var _this = this;
+			function smoothEdges() {
+				ctx.beginPath();
+				ctx.strokeStyle = '#FFFFFF';
+				ctx.lineWidth = 2;
+				ctx.arc(startX, startY, radius + 11, 0, 2 * Math.PI);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.arc(startX, startY, radius - 11, 0, 1.48 * Math.PI);
+				ctx.stroke();
+				if (_this.innerValue) {
+					_this.setInnerValue(_this.innerValue);
+				}
+			}
 			function drawValue(drawnValue) {
 				ctx.beginPath();
 				ctx.fillStyle = "#FFFFFF";
@@ -113,30 +127,33 @@
 					setTimeout(function () {
 						drawValue(drawnValue);
 					}, 10);
+				} else {
+					smoothEdges();
 				}
 			}
 			if (this.options.animation) {
 				drawValue(1);
 			} else {
 				drawValue(this.value);
+				smoothEdges();
 			}
 		},
 		/*=====================================================
 		 *	Set Inner Ring Value : Set the Value for the Inner Ring in Guage Meter
 		=============================*/
 		setInnerValue: function (value) {
-			if (!value) {
-				throw new Error("Provide a value to be set for Gauge meter!");
-			}
-			if (!this.options.innerRing) {
-				throw new Error("Inner Ring not available!");
-			}
 			var ctx = this.canvas.getContext("2d");
 			var startX = this.canvas.width / 2;
 			var startY = (this.canvas.height - 25);
 			var radius = (this.canvas.width - (this.options.lineWidth * 2)) / 2 - (this.options.lineWidth / 2) - 2;
-			this.innerValue = value;
 			var _this = this;
+			function smoothEdges() {
+				ctx.beginPath();
+				ctx.strokeStyle = '#FFFFFF';
+				ctx.lineWidth = 2;
+				ctx.arc(startX, startY, radius - 2, 0, 1.48 * Math.PI);
+				ctx.stroke();
+			}
 			function drawValue(drawnValue) {
 				ctx.beginPath();
 				ctx.strokeStyle = 'gray';
@@ -148,12 +165,15 @@
 					setTimeout(function () {
 						drawValue(drawnValue);
 					}, 10);
+				} else {
+					smoothEdges();
 				}
 			}
 			if (this.options.animation) {
 				drawValue(1);
 			} else {
 				drawValue(this.innerValue);
+				smoothEdges();
 			}
 		}
 	};

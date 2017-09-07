@@ -10,9 +10,8 @@
 <body>
 	<canvas id="gaugeCanvas" width="200" height="150" style="border:1px solid #d3d3d3;"></canvas>
 	<script>
-		var gauge = new GaugeMeter('gaugeCanvas');
-		gauge.setValue(70);
-		gauge.setInnerValue(55);
+		var gauge = new GaugeMeter(document.getElementById('gaugeCanvas'));
+		gauge.setValue(70, 55);
 	</script>
 </body>
 
