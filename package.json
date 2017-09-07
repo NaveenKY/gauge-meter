@@ -1,6 +1,6 @@
 {
   "name": "gauge-meter",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Canvas based Gauge meter",
   "main": "index.js",
   "scripts": {

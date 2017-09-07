@@ -3,15 +3,16 @@
 <head>
 	<script src="index.js"></script>
 	<title>
-		Canvas Gauge
+		Gauge Meter
 	</title>
 </head>
 
 <body>
-	<canvas id="gaugeCanvas" width="200" height="150" style="border:1px solid #d3d3d3;"></canvas>
+	<div id="gauge" style="height: 400px; width: 400px;"></div>
 	<script>
-		var gauge = new GaugeMeter(document.getElementById('gaugeCanvas'));
-		gauge.setValue(70, 55);
+		var gauge = new GaugeMeter(document.getElementById('gauge'));
+		gauge.setValue(100);
+		gauge.setInnerValue(100);
 	</script>
 </body>
 

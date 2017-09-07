@@ -25,15 +25,13 @@
 		if (!element) {
 			throw new Error("No element provided!");
 		}
-		this.canvas = element;
-		if (this.canvas.tagName !== 'CANVAS') {
-			throw new Error("HTML Element must of type CANVAS!");
-		}
+		this.element = element;
 		this.options = {
 			color: '#F4A213',
 			lineWidth: 20,
 			animation: true,
-			innerRing: true
+			innerGauge: true,
+			innerGaugeColor: '#999999'
 		};
 		opts = opts || {};
 		var that = this;
@@ -52,115 +50,122 @@
 		 *	Prepeare Element : Draw the Gauge for the provided input options
 		=============================*/
 		prepareElement: function () {
-			var ctx = this.canvas.getContext("2d");
-			ctx.shadowBlur = 5;
-			ctx.shadowColor = "#9fa0a4";
-			ctx.shadowOffsetX = 0;
-			ctx.shadowOffsetY = 1;
-			ctx.beginPath();
-			ctx.strokeStyle = '#EDEDED';
-			ctx.lineWidth = this.options.lineWidth;
-			var startX = this.canvas.width / 2;
-			var startY = (this.canvas.height - 25);
-			var radius = (this.canvas.width - (this.options.lineWidth * 2)) / 2;
-			ctx.arc(startX, startY, radius, Math.PI, 3 * Math.PI);
-			ctx.stroke();
-			ctx.setLineDash([1, 1]);
-			ctx.beginPath();
-			ctx.lineWidth = 0.7;
-			var dashshedLineStart = (this.canvas.height - radius - this.options.lineWidth - 20);
-			var dashshedLineEnd = (this.canvas.height - radius - this.options.lineWidth - 20 + 30);
-			ctx.strokeStyle = "#000000";
-			ctx.moveTo(this.canvas.width / 2, dashshedLineStart);
-			ctx.lineTo(this.canvas.width / 2, dashshedLineEnd);
-			ctx.stroke();
-			ctx.setLineDash([1, 0]);
-			ctx.font = "14px Arial";
-			ctx.textAlign = "center";
-			ctx.fillStyle = "#999999";
-			ctx.fillText("100%", this.canvas.width / 2, dashshedLineStart - 5);
-			ctx.closePath();
-			ctx.shadowBlur = 0;
-			ctx.shadowColor = "#FFFFFF";
-			ctx.shadowOffsetX = 0;
-			ctx.shadowOffsetY = 0;
+			var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+			svg.setAttribute('width', this.element.offsetWidth);
+			svg.setAttribute('height', this.element.offsetHeight);
+			svg.setAttribute('viewBox', '0 0 400 400')
+			this.svg = svg;
+
+			var outerPath = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+			outerPath.setAttribute('r', 175);
+			outerPath.setAttribute('cx', 200);
+			outerPath.setAttribute('cy', 300);
+			outerPath.setAttribute('stroke', '#EEEEEE');
+			outerPath.setAttribute('stroke-width', '50');
+			outerPath.setAttribute('fill', 'transparent');
+
+			var outerGauge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+			outerGauge.setAttribute('r', 175);
+			outerGauge.setAttribute('cx', 200);
+			outerGauge.setAttribute('cy', 300);
+			outerGauge.setAttribute('stroke', this.options.color);
+			outerGauge.setAttribute('stroke-width', '50');
+			outerGauge.setAttribute('fill', 'transparent');
+			outerGauge.setAttribute('stroke-dasharray', '0, 1000000');
+			outerGauge.setAttribute('transform', 'rotate(-220 200 300)');
+			this.outerGauge = outerGauge;
+
+			var innerGauge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+			innerGauge.setAttribute('r', 145);
+			innerGauge.setAttribute('cx', 200);
+			innerGauge.setAttribute('cy', 300);
+			innerGauge.setAttribute('stroke', this.options.innerGaugeColor);
+			innerGauge.setAttribute('stroke-width', '11');
+			innerGauge.setAttribute('fill', 'transparent');
+			innerGauge.setAttribute('stroke-dasharray', '0, 1000000');
+			innerGauge.setAttribute('transform', 'rotate(-225 200 300)');
+			this.innerGauge = innerGauge;
+
+			var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+			label.setAttribute('x', '200');
+			label.setAttribute('y', '80');
+			label.setAttribute('fill', '#CCCCCC');
+			label.setAttribute('font-size', '25px');
+			label.setAttribute('font-family', 'Arial');
+			label.setAttribute('text-anchor', 'middle');
+			label.innerHTML = '100%';
+
+			var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+			line.setAttribute('x1', '200');
+			line.setAttribute('y1', '90');
+			line.setAttribute('x2', '200');
+			line.setAttribute('y2', '170');
+			line.setAttribute('stroke', '#000000');
+			line.setAttribute('stroke-width', '1');
+			line.setAttribute('stroke-dasharray', '2, 1');
+
+			var gaugeLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+			gaugeLabel.setAttribute('x', '200');
+			gaugeLabel.setAttribute('y', '350');
+			gaugeLabel.setAttribute('fill', '#999999');
+			gaugeLabel.setAttribute('font-size', '75px');
+			gaugeLabel.setAttribute('font-family', 'Arial');
+			gaugeLabel.setAttribute('font-weight', 'bold');
+			gaugeLabel.setAttribute('text-anchor', 'middle');
+			this.gaugeLabel = gaugeLabel;
+
+			svg.appendChild(outerPath);
+			svg.appendChild(outerGauge);
+			svg.appendChild(innerGauge);
+			svg.appendChild(label);
+			svg.appendChild(line);
+			svg.appendChild(gaugeLabel);
+			this.element.appendChild(svg);
 		},
 		/*=====================================================
 		 *	Set Value : Set the Value for the Guage Meter
 		=============================*/
-		setValue: function (value, innerValue) {
+		setValue: function (value) {
 			if (!value) {
 				throw new Error("Provide a value to be set for Gauge meter!");
 			}
-			if (this.options.innerRing && !innerValue) {
-				throw new Error("Please provide value for inner ring!");
-			}
-			this.innerValue = innerValue;
-			var ctx = this.canvas.getContext("2d");
-			ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-			this.prepareElement();
-			var startX = this.canvas.width / 2;
-			var startY = (this.canvas.height - 25);
-			var radius = (this.canvas.width - (this.options.lineWidth * 2)) / 2;
 			this.value = value;
 			var _this = this;
 			function drawValue(drawnValue) {
-				ctx.beginPath();
-				ctx.fillStyle = "#FFFFFF";
-				ctx.arc(startX, startY, radius - (_this.options.lineWidth / 2) - 15, Math.PI, 3 * Math.PI);
-				ctx.fill();
-				ctx.closePath();
-				ctx.beginPath();
-				ctx.strokeStyle = _this.options.color;
-				ctx.lineWidth = _this.options.lineWidth;
-				ctx.arc(startX, startY, radius, 0.85 * Math.PI, ((0.85 * Math.PI) + (0.02042035 * drawnValue)));
-				ctx.stroke();
-				ctx.font = "30px Arial";
-				ctx.textAlign = "center";
-				ctx.fillStyle = "#999999";
-				ctx.fillText(drawnValue + "%", _this.canvas.width / 2, _this.canvas.height - 20);
-				ctx.closePath();
+				_this.outerGauge.setAttribute('stroke-dasharray', (drawnValue * 3.96) + ', 1000000');
+				_this.gaugeLabel.innerHTML = drawnValue + '%';
 				if (drawnValue < _this.value) {
 					drawnValue = drawnValue + 1;
 					setTimeout(function () {
 						drawValue(drawnValue);
-					}, 1);
-				} else {
-					_this.setInnerValue(_this.innerValue);
+					}, 10);
 				}
 			}
 			if (this.options.animation) {
 				drawValue(1);
 			} else {
-				drawValue(this.value);
-				_this.setInnerValue(_this.innerValue);
+				drawValue(this.innerValue);
 			}
 		},
 		/*=====================================================
 		 *	Set Inner Ring Value : Set the Value for the Inner Ring in Guage Meter
 		=============================*/
 		setInnerValue: function (value) {
-			var ctx = this.canvas.getContext("2d");
-			ctx.shadowBlur = 1;
-			ctx.shadowColor = "#FFFFFF";
-			ctx.shadowOffsetX = 1;
-			ctx.shadowOffsetY = 1;
-			var startX = this.canvas.width / 2;
-			var startY = (this.canvas.height - 25);
-			var radius = (this.canvas.width - (this.options.lineWidth * 2)) / 2 - (this.options.lineWidth / 2) - 2;
+			if (!this.options.innerGauge) {
+				throw new Error("Inner Gauge is not Available!");
+			}
+			if (!value) {
+				throw new Error("Please provide value for Inner Gauge!");
+			}
+			this.innerValue = value;
 			var _this = this;
 			function drawValue(drawnValue) {
-				ctx.beginPath();
-				ctx.strokeStyle = 'gray';
-				ctx.lineWidth = 4;
-				ctx.arc(startX, startY, radius, 0.85 * Math.PI, ((0.85 * Math.PI) + (0.02042035 * drawnValue)));
-				ctx.stroke();
-				ctx.closePath();
+				_this.innerGauge.setAttribute('stroke-dasharray', (drawnValue * 3.42) + ', 1000000');
 				if (drawnValue < _this.innerValue) {
 					drawnValue = drawnValue + 1;
 					setTimeout(function () {
 						drawValue(drawnValue);
-					}, 1);
+					}, 10);
 				}
 			}
 			if (this.options.animation) {
