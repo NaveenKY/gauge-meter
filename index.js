@@ -126,7 +126,7 @@
 		 *	Set Value : Set the Value for the Guage Meter
 		=============================*/
 		setValue: function (value) {
-			if (!value) {
+			if (value == undefined) {
 				throw new Error("Provide a value to be set for Gauge meter!");
 			}
 			this.value = value;
@@ -142,7 +142,7 @@
 				}
 			}
 			if (this.options.animation) {
-				drawValue(1);
+				drawValue(0);
 			} else {
 				drawValue(this.innerValue);
 			}
@@ -154,7 +154,7 @@
 			if (!this.options.innerGauge) {
 				throw new Error("Inner Gauge is not Available!");
 			}
-			if (!value) {
+			if (value == undefined) {
 				throw new Error("Please provide value for Inner Gauge!");
 			}
 			this.innerValue = value;
@@ -169,7 +169,7 @@
 				}
 			}
 			if (this.options.animation) {
-				drawValue(1);
+				drawValue(0);
 			} else {
 				drawValue(this.innerValue);
 			}
